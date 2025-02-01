@@ -1,0 +1,8 @@
+# Ambiente virtuale
+venv/
+
+# File di configurazione di pyenv
+.python-version
+
+# Tesi, dati e codice successivo di prova
+previous_code_and_data/
