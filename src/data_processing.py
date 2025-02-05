@@ -12,7 +12,7 @@ PATH = '../data/processed/'
 DATASET = '../data/raw/weekly_sales_dataset.csv'
 START_COLUMN = 0
 NUMBER_OF_COLUMNS_TO_KEEP = 12
-TEST_SIZE = 0.3
+TEST_SIZE = 0.2
 VALIDATION_SIZE = 0.2
 
 
@@ -30,6 +30,7 @@ def import_dataset(filepath):
     df = pd.read_csv(filepath, header=None)
     return df
 
+
 def remove_unrelated_features(df, from_col, num_col_to_keep):
     """
     Remove features that are not related to the time series values.
@@ -42,6 +43,7 @@ def remove_unrelated_features(df, from_col, num_col_to_keep):
     """
     df = df.iloc[1:, from_col:num_col_to_keep]
     return df
+
 
 def look_for_missing_data(df):
     """
@@ -62,6 +64,7 @@ def look_for_missing_data(df):
         print("No NaNs found.\n")
     return df
 
+
 def split_data(df):
     """
     Split the data into training, validation, and test sets.
@@ -75,7 +78,20 @@ def split_data(df):
     X, y = df.iloc[:, :9].values, df.iloc[:, 9:].values
     X_train_and_val, X_test, y_train_and_val, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=0, shuffle=True)
     X_train, X_val, y_train, y_val = train_test_split(X_train_and_val, y_train_and_val, test_size=VALIDATION_SIZE, random_state=0, shuffle=True)
+
+    # print number of lines for each dataset
+    print('Original dataset shape:')
+    print(f'  columns: {df.shape[1]} - rows: {df.shape[0]}\n')
+
+    print('Train dataset shape (input):')
+    print(f'  columns: {X_train.shape[1]} - rows: {X_train.shape[0]}\n')
+    print('Validation dataset shape (input):')
+    print(f'  columns: {X_val.shape[1]} - rows: {X_val.shape[0]}\n')
+    print('Test dataset shape (input):')
+    print(f'  columns: {X_test.shape[1]} - rows: {X_test.shape[0]}\n')
+
     return X_train, X_val, X_test, y_train, y_val, y_test
+
 
 def original_data_statistics(X_train, show_plots):
     """
@@ -93,8 +109,6 @@ def original_data_statistics(X_train, show_plots):
     perform_normality_tests(X_train)
     plot_feature_analysis(X_train, 'feature_analysis_original_data.jpg', show_me=show_plots)
 
-from sklearn.preprocessing import PowerTransformer, MinMaxScaler
-import numpy as np
 
 def apply_yeo_johnson_transformation(X_train, X_val, X_test, show_plots):
     """
@@ -120,6 +134,7 @@ def apply_yeo_johnson_transformation(X_train, X_val, X_test, show_plots):
     plot_feature_analysis(X_train, 'feature_analysis_after_Yeo-Johnson_transformation.jpg', show_me=show_plots)
     
     return X_train, X_val, X_test
+
 
 def analyze_and_cap_outliers(X_train, show_plots):
     """
@@ -150,6 +165,7 @@ def analyze_and_cap_outliers(X_train, show_plots):
     plot_feature_analysis(X_train, 'feature_analysis_after_outliers_removal.jpg', show_me=show_plots)
     
     return X_train
+
 
 def apply_min_max_normalization(X_train, X_val, X_test):
     """
@@ -199,6 +215,7 @@ def perform_normality_tests(data):
         else:
             print(f'Non-normal distribution (Anderson-Darling) at significance level {sl}%')
 
+
 def preprocess_data(X_train, X_val, X_test, show_plots=False):
     """
     Preprocess the data by applying selected transformations.
@@ -221,6 +238,7 @@ def preprocess_data(X_train, X_val, X_test, show_plots=False):
     X_train, X_val, X_test = apply_min_max_normalization(X_train, X_val, X_test)
 
     return X_train, X_val, X_test
+    
 
 def load_data(preprocess=False, show_plots=False):
     """

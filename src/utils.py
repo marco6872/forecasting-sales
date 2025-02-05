@@ -1,6 +1,6 @@
 # utils.py
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, median_absolute_error, r2_score
 import numpy as np
 import time
 
@@ -50,30 +50,41 @@ def select_model(models):
         print(f"Invalid choice '{choice}'. Please select a valid option.")
 
 
-
 def evaluate_forecast(y_true, y_pred):
     """
-    Evaluates the forecasts using RMSE, MAE, and WAPE.
+    Evaluates the forecasts using RMSE, MAE, WAPE, and the average RMSE per row.
     
     Parameters:
     y_true (ndarray): The true target values.
     y_pred (ndarray): The predicted values.
     
     Returns:
-    tuple: The RMSE, MAE, and WAPE.
+    dict: RMSE, MAE, WAPE, R^2.
     """
     evaluation = {}
 
-    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-    evaluation['rmse'] = rmse
+    # RMSE globale
+    rmse_global = np.sqrt(mean_squared_error(y_true, y_pred))
+    evaluation['rmse'] = rmse_global
 
+    # MAE (Mean Absolute Error)
     mae = mean_absolute_error(y_true, y_pred)
     evaluation['mae'] = mae
 
-    wape = np.sum(np.abs(y_true - y_pred)) / np.sum(np.abs(y_true)) * 100  # WAPE calcolato in percentuale
+    # MedAE (Median Absolute Error)
+    medae = median_absolute_error(y_true, y_pred)
+    evaluation['medae'] = medae
+
+    # WAPE (Weighted Absolute Percentage Error)
+    wape = np.sum(np.abs(y_true - y_pred)) / np.sum(np.abs(y_true)) * 100
     evaluation['wape'] = wape
 
+    # R^2 Score (Coefficient of Determination)
+    r2 = r2_score(y_true, y_pred)
+    evaluation['r2'] = r2
+
     return evaluation
+
 
 
 def print_model_evaluation(dataset_name, evaluation):

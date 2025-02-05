@@ -1,7 +1,7 @@
 # models/naive_model.py
 
 import numpy as np
-from utils import evaluate_forecast
+from utils import evaluate_forecast, measure_time
 
 
 def naive_forecast(X):
@@ -16,6 +16,7 @@ def naive_forecast(X):
     """
     return np.tile(X[:, -1:], (1, 3))
 
+@measure_time
 def train_naive_model(X_train, y_train, X_val, y_val):
     """
     Train the naive model and evaluate it on the training and validation sets.
@@ -38,7 +39,8 @@ def train_naive_model(X_train, y_train, X_val, y_val):
     val_evaluation = evaluate_forecast(y_val, y_val_pred)
 
     return train_evaluation, val_evaluation
-
+    
+@measure_time
 def test_naive_model(X_test, y_test):
     """
     Test the naive model and evaluate it on the test set.
