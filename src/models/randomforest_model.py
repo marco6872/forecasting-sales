@@ -50,7 +50,7 @@ def train_randomforest_model(X_train, y_train, X_val, y_val):
     model = MultiOutputRegressor(randomforest_regressor)
 
     # Perform GridSearchCV to find the best hyperparameters
-    grid_search = GridSearchCV(model, param_grid, cv=10, scoring='neg_mean_squared_error', verbose=3)
+    grid_search = GridSearchCV(model, param_grid, cv=2, scoring='neg_mean_squared_error', verbose=3)
     grid_search.fit(X_train, y_train)
 
     # Best model from GridSearchCV
@@ -65,10 +65,10 @@ def train_randomforest_model(X_train, y_train, X_val, y_val):
     y_val_pred = best_model.predict(X_val)
 
     # Evaluate the predictions
-    train_rmse, train_mae = evaluate_forecast(y_train, y_train_pred)
-    val_rmse, val_mae = evaluate_forecast(y_val, y_val_pred)
+    train_evaluation = evaluate_forecast(y_train, y_train_pred)
+    val_evaluation = evaluate_forecast(y_val, y_val_pred)
 
-    return train_rmse, train_mae, val_rmse, val_mae
+    return train_evaluation, val_evaluation
 
 
 @measure_time
@@ -90,9 +90,9 @@ def test_randomforest_model(X_test, y_test):
     y_test_pred = model.predict(X_test)
 
     # Evaluate the predictions
-    test_rmse, test_mae = evaluate_forecast(y_test, y_test_pred)
+    test_evaluation = evaluate_forecast(y_test, y_test_pred)
 
-    return test_rmse, test_mae
+    return test_evaluation
 
 
 def print_best_params(best_params):

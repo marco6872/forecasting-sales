@@ -63,14 +63,23 @@ def evaluate_forecast(y_true, y_pred):
     tuple: The RMSE, MAE, and WAPE.
     """
     evaluation = {}
+
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     evaluation['rmse'] = rmse
-    mae = mean_absolute_error(y_true, y_pred)
-    wape = np.sum(np.abs(y_true - y_pred)) / np.sum(np.abs(y_true)) * 100  # WAPE calcolato in percentuale
-    
-    # return rmse, mae, wape
 
-    return rmse, mae
+    mae = mean_absolute_error(y_true, y_pred)
+    evaluation['mae'] = mae
+
+    wape = np.sum(np.abs(y_true - y_pred)) / np.sum(np.abs(y_true)) * 100  # WAPE calcolato in percentuale
+    evaluation['wape'] = wape
+
+    return evaluation
+
+
+def print_model_evaluation(dataset_name, evaluation):
+    print(f'\n{dataset_name} data evaluation:')
+    for test_name, value in evaluation.items():
+        print(f' {test_name}: {value:.2f}')
 
 
 def measure_time(func):

@@ -29,14 +29,15 @@ def train_naive_model(X_train, y_train, X_val, y_val):
     Returns:
     tuple: The RMSE and MAE for the training and validation sets.
     """
-    # Generate naive forecasts
+    # Generate predictions
     y_train_pred = naive_forecast(X_train)
     y_val_pred = naive_forecast(X_val)
 
-    train_rmse, train_mae = evaluate_forecast(y_train, y_train_pred)
-    val_rmse, val_mae = evaluate_forecast(y_val, y_val_pred)
+    # Evaluate the predictions
+    train_evaluation = evaluate_forecast(y_train, y_train_pred)
+    val_evaluation = evaluate_forecast(y_val, y_val_pred)
 
-    return train_rmse, train_mae, val_rmse, val_mae
+    return train_evaluation, val_evaluation
 
 def test_naive_model(X_test, y_test):
     """
@@ -49,10 +50,10 @@ def test_naive_model(X_test, y_test):
     Returns:
     tuple: The RMSE and MAE.
     """
-    # Generate naive forecasts
+    # Generate predictions
     y_test_pred = naive_forecast(X_test)
 
-    # Evaluate the forecasts using RMSE
-    test_rmse, test_mae = evaluate_forecast(y_test, y_test_pred)
+    # Evaluate the predictions
+    test_evaluation = evaluate_forecast(y_test, y_test_pred)
 
-    return test_rmse, test_mae
+    return test_evaluation

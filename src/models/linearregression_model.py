@@ -41,10 +41,10 @@ def train_linearregression_model(X_train, y_train, X_val, y_val):
     y_val_pred = model.predict(X_val)
 
     # Evaluate the predictions
-    train_rmse, train_mae = evaluate_forecast(y_train, y_train_pred)
-    val_rmse, val_mae = evaluate_forecast(y_val, y_val_pred)
+    train_evaluation = evaluate_forecast(y_train, y_train_pred)
+    val_evaluation = evaluate_forecast(y_val, y_val_pred)
 
-    return train_rmse, train_mae, val_rmse, val_mae
+    return train_evaluation, val_evaluation
     
 
 @measure_time
@@ -66,6 +66,6 @@ def test_linearregression_model(X_test, y_test):
     y_test_pred = model.predict(X_test)
 
     # Evaluate the predictions
-    test_rmse, test_mae = evaluate_forecast(y_test, y_test_pred)
+    test_evaluation = evaluate_forecast(y_test, y_test_pred)
 
-    return test_rmse, test_mae
+    return test_evaluation

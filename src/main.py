@@ -2,7 +2,7 @@
 
 import os
 from data_processing import load_data
-from utils import ask_user, select_model
+from utils import ask_user, select_model, print_model_evaluation
 from models import model_dispatcher   # imported from ./models/__init__.py
 
 def main():
@@ -25,17 +25,27 @@ def main():
     # Train and evaluate the selected model
     print(f"\nTraining and evaluating model: {selected_model_name}")
     
-    # Training
-    train_rmse, train_mae, val_rmse, val_mae = train_func(X_train, y_train, X_val, y_val)
-    print('\nTrain data evaluation:')
-    print(f' RMSE: {train_rmse:.2f}\n MAE: {train_mae:.2f}')
-    print('Validation data evaluation:')
-    print(f' RMSE: {val_rmse:.2f}\n MAE: {val_mae:.2f}')
+    # # Training
+    # train_rmse, train_mae, val_rmse, val_mae = train_func(X_train, y_train, X_val, y_val)
+    # print('\nTrain data evaluation:')
+    # print(f' RMSE: {train_rmse:.2f}\n MAE: {train_mae:.2f}')
+    # print('Validation data evaluation:')
+    # print(f' RMSE: {val_rmse:.2f}\n MAE: {val_mae:.2f}')
 
-    # Testing
-    test_rmse, test_mae = test_func(X_test, y_test)
-    print('\nTest data evaluation:')
-    print(f' RMSE: {test_rmse:.2f}\n MAE: {test_mae:.2f}')
+    # # Testing
+    # test_rmse, test_mae = test_func(X_test, y_test)
+    # print('\nTest data evaluation:')
+    # print(f' RMSE: {test_rmse:.2f}\n MAE: {test_mae:.2f}')
+
+
+    train_evaluation, val_evaluation = train_func(X_train, y_train, X_val, y_val)
+    print_model_evaluation("Train", train_evaluation)
+    print_model_evaluation("Validation", val_evaluation)
+
+    test_evaluation = test_func(X_test, y_test)
+    print_model_evaluation("Test", test_evaluation)
+
+    print()
 
 if __name__ == "__main__":
     main()
