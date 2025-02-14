@@ -5,25 +5,6 @@ import numpy as np
 import time
 
 
-def ask_user(prompt):
-    """
-    Ask the user a yes/no question and return a boolean.
-    Repeats until valid input is received.
-
-    Parameters:
-    - prompt (str): The question to ask the user.
-
-    Returns:
-    - bool: True if the user answers 'y', False if 'n'.
-    """
-    while True:
-        response = input(prompt).strip().lower()
-        if response in ('y', 'yes'):
-            return True
-        elif response in ('n', 'no'):
-            return False
-        print("Invalid input. Please answer with 'y'/'yes' or 'n'/'no'.")
-
 def select_model(models):
     """
     Allow the user to select a model from the available options.
@@ -46,11 +27,11 @@ def select_model(models):
         choice = input("Select a model by number: ").strip()
         if choice in models_dict:
             model_name = models_dict[choice]
-            return model_name, models[model_name][0], models[model_name][1]
+            return model_name, models[model_name]
         print(f"Invalid choice '{choice}'. Please select a valid option.")
 
 
-def evaluate_forecast(y_true, y_pred):
+def evaluate_forecast(y_true, y_pred, minmax_scaler):
     """
     Evaluates the forecasts using RMSE, MAE, WAPE, and the average RMSE per row.
     
@@ -59,8 +40,12 @@ def evaluate_forecast(y_true, y_pred):
     y_pred (ndarray): The predicted values.
     
     Returns:
-    dict: RMSE, MAE, WAPE, R^2.
+    dict: RMSE, MAE, MedAE, WAPE, R^2.
     """
+    denormalization_factor = 1 / minmax_scaler.scale_
+    y_true = y_true * denormalization_factor
+    y_pred = y_pred * denormalization_factor
+
     evaluation = {}
 
     # RMSE globale
@@ -86,11 +71,10 @@ def evaluate_forecast(y_true, y_pred):
     return evaluation
 
 
-
-def print_model_evaluation(dataset_name, evaluation):
-    print(f'\n{dataset_name} data evaluation:')
+def print_model_evaluation(model_name, evaluation):
+    print(f'\n{model_name} model evaluation:')
     for test_name, value in evaluation.items():
-        print(f' {test_name}: {value:.2f}')
+        print(f' {test_name}: {value:.3f}')
 
 
 def measure_time(func):
@@ -104,5 +88,6 @@ def measure_time(func):
         print(f"\nExecution time for {func.__name__}: {end_time - start_time:.2f} seconds")
         return result
     return wrapper
+
 
 

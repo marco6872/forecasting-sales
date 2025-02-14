@@ -3,7 +3,6 @@
 import numpy as np
 from utils import evaluate_forecast, measure_time
 
-
 def naive_forecast(X):
     """
     Implements the naive method for forecasting.
@@ -12,50 +11,29 @@ def naive_forecast(X):
     X (ndarray): The input time series.
     
     Returns:
-    ndarray: The naive forecasts.
+    ndarray: The naive forecasts, which are simply the last observed value.
     """
-    return np.tile(X[:, -1:], (1, 3))
+    return X[:, -1]
 
 @measure_time
-def train_naive_model(X_train, y_train, X_val, y_val):
+def train_and_test_naive_model(X_train, y_train, X_test, y_test, minmax_scaler):
     """
-    Train the naive model and evaluate it on the training and validation sets.
+    Trains and tests the naive forecasting model.
     
     Parameters:
-    X_train (ndarray): The training input data.
-    y_train (ndarray): The training target data.
-    X_val (ndarray): The validation input data.
-    y_val (ndarray): The validation target data.
+    X_train (ndarray): Training input time series.
+    y_train (ndarray): Training output time series (not used in naive method).
+    X_test (ndarray): Testing input time series.
+    y_test (ndarray): Testing output time series.
+    minmax_scaler (object): Scaler used for normalizing/denormalizing data.
     
     Returns:
-    tuple: The RMSE and MAE for the training and validation sets.
+    dict: Evaluation metrics for the naive forecasts on the test set.
     """
-    # Generate predictions
-    y_train_pred = naive_forecast(X_train)
-    y_val_pred = naive_forecast(X_val)
-
-    # Evaluate the predictions
-    train_evaluation = evaluate_forecast(y_train, y_train_pred)
-    val_evaluation = evaluate_forecast(y_val, y_val_pred)
-
-    return train_evaluation, val_evaluation
-    
-@measure_time
-def test_naive_model(X_test, y_test):
-    """
-    Test the naive model and evaluate it on the test set.
-    
-    Parameters:
-    X_test (ndarray): The test input data.
-    y_test (ndarray): The test target data.
-    
-    Returns:
-    tuple: The RMSE and MAE.
-    """
-    # Generate predictions
+    # Generate predictions using the naive method
     y_test_pred = naive_forecast(X_test)
 
-    # Evaluate the predictions
-    test_evaluation = evaluate_forecast(y_test, y_test_pred)
+    # Evaluate the predictions using the provided evaluation function
+    test_evaluation = evaluate_forecast(y_test, y_test_pred, minmax_scaler)
 
     return test_evaluation

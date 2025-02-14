@@ -2,14 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-def plot_feature_analysis(data, filename=None, show_me=True, feature_names=None):
+def plot_feature_analysis(data, filename=None, feature_names=None):
     """
     Plots histograms, Q-Q plots, and box plots for each feature in the data and saves the image.
 
     Parameters:
     - data: ndarray, shape (n_samples, n_features)
     - filename: str, optional, name of the file to save the image
-    - show_me: bool, optional, whether to display the plot
     - feature_names: list of str, optional, names of the features
     """
     n_features = data.shape[1]
@@ -46,12 +45,6 @@ def plot_feature_analysis(data, filename=None, show_me=True, feature_names=None)
         path = '../data/processed/'
         plt.savefig(path + filename)
 
-    # Show the figure
-    if show_me:
-        plt.show()
-
     # Close the plot
     plt.close()
 
-# Example usage
-# plot_feature_analysis(data, 'feature_analysis.png', show_me=False)
