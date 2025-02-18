@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
 from utils import evaluate_forecast, measure_time
 from models import saved_models_path  # imported from ./models/__init__.py
 from models.deep_learning_utils import create_dataloaders, train_model, test_model
@@ -57,27 +56,37 @@ def train_and_test_torch_linearregression_model(X_train, y_train, X_test, y_test
     dict: Evaluation metrics for the test set predictions.
     """
     input_dim = X_train.shape[1]
-    output_dim = y_train.shape[1] if len(y_train.shape) > 1 else 1
+    output_dim = 1
 
     # Create data loaders
     train_loader, test_loader = create_dataloaders(X_train, y_train, X_test, y_test, BATCH_SIZE)
 
     # Initialize the model, criterion, and optimizer
     model = LinearRegressionModel(input_dim, output_dim)
-    criterion = nn.MSELoss()
+    # criterion = nn.MSELoss()
+    criterion = nn.HuberLoss(delta=1.0)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # Train the model
-    train_model(model, criterion, optimizer, train_loader, NUM_EPOCHS)
+    train_model(model, criterion, optimizer, train_loader, test_loader, NUM_EPOCHS)
 
     # Save the model
     torch.save(model.state_dict(), f'{saved_models_path}{MODEL_FILENAME}')
-    print(f'Model saved to {saved_models_path}{MODEL_FILENAME}')
+    print(f'\nModel saved to {saved_models_path}{MODEL_FILENAME}')
 
     # Test the model
     y_test_pred = test_model(model, test_loader)
 
     # Evaluate the predictions
     test_evaluation = evaluate_forecast(y_test, y_test_pred.squeeze(), minmax_scaler)
+
+    # Print model architecture
+    print("Model Architecture:\n", model)
+
+    # Print model parameters
+    print("\nModel Parameters:")
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            print(name, param.data)
 
     return test_evaluation

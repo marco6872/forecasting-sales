@@ -1,54 +1,34 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from utils import evaluate_forecast, measure_time
-from models import saved_models_path  # imported from ./models/__init__.py
+from models import saved_models_path
 from models.deep_learning_utils import create_dataloaders, train_model, test_model
 
 
-MODEL_FILENAME = 'dl_fcn_model.pth'
-HIDDEN_SIZE = 64
-NUM_EPOCHS = 2000
-LEARNING_RATE = 2e-5
+MODEL_FILENAME = 'dl_gru_model.pth'
+NUM_EPOCHS = 1000
+LEARNING_RATE = 1e-4
 BATCH_SIZE = 128
 
 
-class FullyConnectedNetwork(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        """
-        Initialize the fully connected network.
-        
-        Parameters:
-        input_size (int): The number of input features.
-        hidden_size (int): The number of units in the hidden layers.
-        output_size (int): The number of output features.
-        """
-        super(FullyConnectedNetwork, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu1 = nn.LeakyReLU(0.1)
-        self.drop1 = nn.Dropout(0.2)
-        self.fc2 = nn.Linear(hidden_size, output_size)
-    
+class GRU(nn.Module):
+    def __init__(self):
+        super(GRU, self).__init__()
+
+        self.lstm = nn.GRU(input_size=9, hidden_size=50)
+        self.fc = nn.Linear(in_features=50, out_features=1)
+
     def forward(self, x):
-        """
-        Forward pass for the fully connected network.
-        
-        Parameters:
-        x (torch.Tensor): Input tensor.
-        
-        Returns:
-        torch.Tensor: Output tensor.
-        """
-        out = self.fc1(x)
-        out = self.relu1(out)
-        out = self.drop1(out)
-        out = self.fc2(out)
+        out, _ = self.lstm(x)
+        out = self.fc(out)
         return out
 
 
 @measure_time
-def train_and_test_fcn_model(X_train, y_train, X_test, y_test, minmax_scaler):
+def train_and_test_gru_model(X_train, y_train, X_test, y_test, minmax_scaler):
     """
     Train and test the Fully Connected Network model class.
     
@@ -62,17 +42,15 @@ def train_and_test_fcn_model(X_train, y_train, X_test, y_test, minmax_scaler):
     Returns:
     dict: Evaluation metrics for the test set predictions.
     """
-    input_dim = X_train.shape[1]
-    output_dim = 1
 
     # Create data loaders
     train_loader, test_loader = create_dataloaders(X_train, y_train, X_test, y_test, BATCH_SIZE)
 
     # Initialize the model, criterion, and optimizer
-    model = FullyConnectedNetwork(input_dim, HIDDEN_SIZE, output_dim)
+    model = GRU()
     # criterion = nn.MSELoss()
     criterion = nn.HuberLoss(delta=1.0)
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
     # Train the model
     train_model(model, criterion, optimizer, train_loader, test_loader, NUM_EPOCHS)
@@ -86,8 +64,5 @@ def train_and_test_fcn_model(X_train, y_train, X_test, y_test, minmax_scaler):
 
     # Evaluate the predictions
     test_evaluation = evaluate_forecast(y_test, y_test_pred.squeeze(), minmax_scaler)
-
-    # Print model architecture
-    print("\nModel Architecture:\n", model)
 
     return test_evaluation

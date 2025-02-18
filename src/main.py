@@ -31,7 +31,7 @@ def main():
     selected_model_name, train_and_test = select_model(model_choices)
 
     # Train and evaluate the selected model
-    print(f"\nTraining and evaluating model: {selected_model_name}")
+    print(f"\nSelected model: {selected_model_name}")
     
     # Training
     model_evaluation = train_and_test(X_train, y_train, X_test, y_test, minmax_scaler)
