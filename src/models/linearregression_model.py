@@ -1,8 +1,11 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from joblib import dump, load
+
 from utils import evaluate_forecast, measure_time
-from models import saved_models_path  # imported from ./models/__init__.py
+from models import saved_models_path
+
+from visualize import plot_real_vs_predicted
 
 
 MODEL_FILENAME = 'linearregression_model.joblib'
@@ -44,6 +47,8 @@ def train_and_test_linearregression_model(X_train, y_train, X_test, y_test, minm
 
     # Evaluate the predictions on the test data
     test_evaluation = evaluate_forecast(y_test, y_test_pred, minmax_scaler)
+
+    plot_real_vs_predicted(y_test, y_test_pred)
 
     return test_evaluation
 

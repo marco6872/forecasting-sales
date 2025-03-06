@@ -3,7 +3,10 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from joblib import dump, load
 from utils import evaluate_forecast, measure_time
-from models import saved_models_path  # imported from ./models/__init__.py
+from models import saved_models_path
+
+from visualize import plot_real_vs_predicted
+
 from sklearn.model_selection import GridSearchCV, cross_val_score
 
 # Define the filename for saving the trained model
@@ -37,19 +40,11 @@ def train_and_test_randomforest_model(X_train, y_train, X_test, y_test, minmax_s
     """
 
     # Define the parameter grid for GridSearchCV
-    # param_grid = {
-    #     'n_estimators': [100, 200],
-    #     'max_depth': [None, 5, 10, 20, 30],
-    #     'min_samples_split': [2, 5, 10],
-    #     'min_samples_leaf': [1, 2, 4],
-    #     'max_features': ['auto', 'sqrt', 'log2'],
-    #     'bootstrap': [True, False]
-    # }
     param_grid = {
-        'n_estimators': [100],
-        'max_depth': [5],
-        'min_samples_split': [5],
-        'min_samples_leaf': [2],
+        'n_estimators': [10, 50, 100], #100
+        'max_depth': [2, 5, 10], #5
+        'min_samples_split': [2, 10, 20], #2
+        'min_samples_leaf': [1, 2, 5, 10], #10
         'bootstrap': [True]
     }
 
@@ -57,7 +52,7 @@ def train_and_test_randomforest_model(X_train, y_train, X_test, y_test, minmax_s
     model = RandomForestRegressor(random_state=42)
 
     # Perform GridSearchCV to find the best hyperparameters
-    grid_search = GridSearchCV(model, param_grid, cv=2, scoring='neg_mean_squared_error', verbose=3)
+    grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error', verbose=3)
     grid_search.fit(X_train, y_train)
 
     # Best model from GridSearchCV
@@ -78,5 +73,7 @@ def train_and_test_randomforest_model(X_train, y_train, X_test, y_test, minmax_s
 
     # Evaluate the predictions for the test set
     test_evaluation = evaluate_forecast(y_test, y_test_pred, minmax_scaler)
+
+    plot_real_vs_predicted(y_test, y_test_pred)
 
     return test_evaluation

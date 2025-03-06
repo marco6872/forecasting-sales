@@ -3,6 +3,8 @@
 import numpy as np
 from utils import evaluate_forecast, measure_time
 
+from visualize import plot_real_vs_predicted
+
 def naive_forecast(X):
     """
     Implements the naive method for forecasting.
@@ -35,5 +37,7 @@ def train_and_test_naive_model(X_train, y_train, X_test, y_test, minmax_scaler):
 
     # Evaluate the predictions using the provided evaluation function
     test_evaluation = evaluate_forecast(y_test, y_test_pred, minmax_scaler)
+
+    plot_real_vs_predicted(y_test, y_test_pred)
 
     return test_evaluation

@@ -1,3 +1,5 @@
+# visualize.py
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -47,4 +49,27 @@ def plot_feature_analysis(data, filename=None, feature_names=None):
 
     # Close the plot
     plt.close()
+
+
+
+def plot_real_vs_predicted(y_real, y_pred, title="Real vs Predicted"):
+    """
+    Create a scatter plot of real and predicted points.
+    
+    Parameters:
+    y_real (np.array): Real values.
+    y_pred (np.array): Predicted values.
+    title (str): Title of the plot.
+    """
+    plt.figure(figsize=(10, 6))
+    plt.scatter(y_real, y_pred, color='blue', alpha=0.5, label='Predicted')
+    plt.plot([y_real.min(), y_real.max()], [y_real.min(), y_real.max()], color='red', lw=2, label='Ideal')
+    plt.xlabel('Real')
+    plt.ylabel('Predicted')
+    plt.title(title)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
 

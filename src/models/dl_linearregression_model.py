@@ -1,10 +1,17 @@
+# dl_linearregression_model.pt
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
+from torchinfo import summary
+
 from utils import evaluate_forecast, measure_time
 from models import saved_models_path  # imported from ./models/__init__.py
-from models.deep_learning_utils import create_dataloaders, train_model, test_model
+from models.deep_learning_utils import create_dataloaders, train_model, test_model, set_seed
+
+from visualize import plot_real_vs_predicted
 
 
 MODEL_FILENAME = 'dl_linearregression_model.pth'
@@ -55,6 +62,10 @@ def train_and_test_torch_linearregression_model(X_train, y_train, X_test, y_test
     Returns:
     dict: Evaluation metrics for the test set predictions.
     """
+
+    # Set a seed for reproducibility
+    set_seed(42)
+
     input_dim = X_train.shape[1]
     output_dim = 1
 
@@ -66,6 +77,14 @@ def train_and_test_torch_linearregression_model(X_train, y_train, X_test, y_test
     # criterion = nn.MSELoss()
     criterion = nn.HuberLoss(delta=1.0)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    # train parameters
+    print(f'\nLearning Rate: {LEARNING_RATE}')
+    print(f'Epochs: {NUM_EPOCHS}')
+    print(f'Batch Size: {BATCH_SIZE}')
+
+    # model summary
+    summary(model, input_size=(BATCH_SIZE, 9))
 
     # Train the model
     train_model(model, criterion, optimizer, train_loader, test_loader, NUM_EPOCHS)
@@ -80,13 +99,6 @@ def train_and_test_torch_linearregression_model(X_train, y_train, X_test, y_test
     # Evaluate the predictions
     test_evaluation = evaluate_forecast(y_test, y_test_pred.squeeze(), minmax_scaler)
 
-    # Print model architecture
-    print("Model Architecture:\n", model)
-
-    # Print model parameters
-    print("\nModel Parameters:")
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            print(name, param.data)
+    plot_real_vs_predicted(y_test, y_test_pred.squeeze())
 
     return test_evaluation

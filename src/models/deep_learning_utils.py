@@ -1,5 +1,8 @@
+# deep_learning_utils.py
+
 import numpy as np
 import torch
+import random
 from torch.utils.data import DataLoader, TensorDataset
 
 
@@ -100,3 +103,15 @@ def test_model(model, test_loader):
             predictions.append(outputs.numpy())
     predictions = np.vstack(predictions)
     return predictions
+
+
+def set_seed(seed):
+    """
+    Set the seed for reproducibility.
+    
+    Parameters:
+    seed (int): The seed value.
+    """
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    random.seed(seed)

@@ -149,8 +149,7 @@ def preprocess_split_data(
     df,
     test_size,
     outlier_removal=False,
-    minmax_normalization=False,
-    yeo_johnson=False):
+    minmax_normalization=True):
     """
     Split the data into training and test sets.
 
@@ -159,11 +158,15 @@ def preprocess_split_data(
     test_size (int): The number of samples in the test set.
     outlier_removal (bool): Whether to remove outliers from the training set.
     minmax_normalization (bool): Whether to apply Min-Max normalization.
-    yeo_johnson (bool): Whether to apply Yeo-Johnson transformation.
 
     Returns:
     tuple: The training and test sets (X_train, X_test, y_train, y_test).
     """
+
+    class DummyScaler:
+        def __init__(self, scale=1, minimum=0):
+            self.scale_ = scale
+            self.min_ = minimum
 
     df = remove_unrelated_features(df, START_COLUMN, NUMBER_OF_COLUMNS_TO_KEEP)
     df = look_for_missing_data(df)
@@ -175,13 +178,10 @@ def preprocess_split_data(
     if outlier_removal:
         train_data = remove_outliers(train_data)
 
-    minmax_scaler = None
     if minmax_normalization:
         train_data, test_data, minmax_scaler = min_max_normalization(train_data, test_data)
-
-    if yeo_johnson:
-        pass
-
+    else:
+        minmax_scaler = DummyScaler()
 
     in_len = NUMBER_OF_COLUMNS_TO_KEEP - NUMBER_OF_VALUES_TO_PREDICT
     out_len = NUMBER_OF_VALUES_TO_PREDICT
@@ -200,10 +200,6 @@ def preprocess_split_data(
     X_test, y_test = create_sliding_window(test_data, in_len, out_len)
 
     np.set_printoptions(precision=3, suppress=True)
-
-
-    # X_train, y_train = train_data[:, :in_len], train_data[:, in_len:]
-    # X_test, y_test = test_data[:, :in_len], test_data[:, in_len:]
 
     return X_train, y_train, X_test, y_test, minmax_scaler
 
@@ -225,59 +221,36 @@ def original_data_statistics(X_train):
     plot_feature_analysis(X_train, 'feature_analysis_original_data.jpg')
 
 
-def apply_yeo_johnson_transformation(X_train, X_test):   ############### DA SISTEMARE  ############################################
-    """
-    Apply Yeo-Johnson transformation to improve data distribution.
+# def perform_normality_tests(data):
+#     """
+#     Perform normality tests on the data.
 
-    Parameters:
-    X_train (ndarray): The training dataset.
-    X_test (ndarray): The test dataset.
+#     Parameters:
+#     data (ndarray): The dataset.
 
-    Returns:
-    tuple: The transformed training, validation, and test sets (X_train, X_test).
-    """
-    pt = PowerTransformer(method='yeo-johnson')
-    X_train = pt.fit_transform(X_train)
-    X_test = pt.transform(X_test)
+#     Returns:
+#     None
+#     """
+#     # Kolmogorov-Smirnov Test
+#     stat, p = stats.kstest(data.flatten(), 'norm')
+#     print('Kolmogorov-Smirnov Statistics=%.3f, p=%.3f' % (stat, p))
+#     if p > 0.05:
+#         print('Normal distribution (Kolmogorov-Smirnov)')
+#     else:
+#         print('Non-normal distribution (Kolmogorov-Smirnov)')
     
-    # Perform normality tests and plot the results for X_train
-    print('\nNormality tests for Yeo-Johnson transformed X_train data:\n')
-    perform_normality_tests(X_train)
-    plot_feature_analysis(X_train, 'feature_analysis_after_Yeo-Johnson_transformation.jpg')
-    
-    return X_train, X_test
+#     # Anderson-Darling Test
+#     result = stats.anderson(data.flatten(), dist='norm')
+#     print('Anderson-Darling Statistics=%.3f' % result.statistic)
+#     for i in range(len(result.critical_values)):
+#         sl, cv = result.significance_level[i], result.critical_values[i]
+#         if result.statistic < cv:
+#             print(f'Normal distribution (Anderson-Darling) at significance level {sl}%')
+#         else:
+#             print(f'Non-normal distribution (Anderson-Darling) at significance level {sl}%')
 
 
-def perform_normality_tests(data):
-    """
-    Perform normality tests on the data.
-
-    Parameters:
-    data (ndarray): The dataset.
-
-    Returns:
-    None
-    """
-    # Kolmogorov-Smirnov Test
-    stat, p = stats.kstest(data.flatten(), 'norm')
-    print('Kolmogorov-Smirnov Statistics=%.3f, p=%.3f' % (stat, p))
-    if p > 0.05:
-        print('Normal distribution (Kolmogorov-Smirnov)')
-    else:
-        print('Non-normal distribution (Kolmogorov-Smirnov)')
-    
-    # Anderson-Darling Test
-    result = stats.anderson(data.flatten(), dist='norm')
-    print('Anderson-Darling Statistics=%.3f' % result.statistic)
-    for i in range(len(result.critical_values)):
-        sl, cv = result.significance_level[i], result.critical_values[i]
-        if result.statistic < cv:
-            print(f'Normal distribution (Anderson-Darling) at significance level {sl}%')
-        else:
-            print(f'Non-normal distribution (Anderson-Darling) at significance level {sl}%')
-
-
-def load_data(dataset_filename, test_size, remove_outliers=False, minmax_normalization=False, yeo_johnson=False):
+def load_data(dataset_filename, test_size, remove_outliers=False, minmax_normalization=True):
     """
     Load preprocessed data or preprocess raw data based on user choice.
 
@@ -296,7 +269,6 @@ def load_data(dataset_filename, test_size, remove_outliers=False, minmax_normali
         test_size=test_size,
         outlier_removal=remove_outliers,
         minmax_normalization=minmax_normalization,
-        yeo_johnson=yeo_johnson,
     )
 
     # Save processed data
