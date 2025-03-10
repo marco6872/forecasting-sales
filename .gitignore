@@ -1,6 +1,10 @@
 # Ambiente virtuale
 venv/
 
+# Python
+*.pyc
+__pycache__/
+
 # File di configurazione di pyenv
 .python-version
 
