@@ -204,61 +204,23 @@ def preprocess_split_data(
     return X_train, y_train, X_test, y_test, minmax_scaler
 
 
-def original_data_statistics(X_train):
-    """
-    Perform statistical analysis on the original training dataset.
-
-    Parameters:
-    X_train (ndarray): The training dataset.
-
-    Returns:
-    None
-    """
-    df_train = pd.DataFrame(X_train, columns=[f'Feature {i+1}' for i in range(X_train.shape[1])])
-    print(df_train.describe())
-    print('\nNormality tests for original X_train data:\n')
-    perform_normality_tests(X_train)
-    plot_feature_analysis(X_train, 'feature_analysis_original_data.jpg')
-
-
-# def perform_normality_tests(data):
-#     """
-#     Perform normality tests on the data.
-
-#     Parameters:
-#     data (ndarray): The dataset.
-
-#     Returns:
-#     None
-#     """
-#     # Kolmogorov-Smirnov Test
-#     stat, p = stats.kstest(data.flatten(), 'norm')
-#     print('Kolmogorov-Smirnov Statistics=%.3f, p=%.3f' % (stat, p))
-#     if p > 0.05:
-#         print('Normal distribution (Kolmogorov-Smirnov)')
-#     else:
-#         print('Non-normal distribution (Kolmogorov-Smirnov)')
-    
-#     # Anderson-Darling Test
-#     result = stats.anderson(data.flatten(), dist='norm')
-#     print('Anderson-Darling Statistics=%.3f' % result.statistic)
-#     for i in range(len(result.critical_values)):
-#         sl, cv = result.significance_level[i], result.critical_values[i]
-#         if result.statistic < cv:
-#             print(f'Normal distribution (Anderson-Darling) at significance level {sl}%')
-#         else:
-#             print(f'Non-normal distribution (Anderson-Darling) at significance level {sl}%')
-
-
 def load_data(dataset_filename, test_size, remove_outliers=False, minmax_normalization=True):
     """
     Load preprocessed data or preprocess raw data based on user choice.
 
     Parameters:
-    - preprocess (bool): Whether to preprocess the data or load preprocessed data.
+    dataset_filename (str): The name of the CSV file containing the dataset.
+    test_size (int): The number of samples to be used for the test set.
+    remove_outliers (bool): Whether to remove outliers from the dataset. Default is False.
+    minmax_normalization (bool): Whether to apply Min-Max normalization. Default is True.
 
     Returns:
-    - tuple: X_train, X_test, y_train, y_test.
+    tuple: X_train, X_test, y_train, y_test, minmax_scaler
+        X_train (np.array): Training features.
+        y_train (np.array): Training target values.
+        X_test (np.array): Test features.
+        y_test (np.array): Test target values.
+        minmax_scaler (object): Scaler object for inverse transforming the predictions.
     """
     print(f'\nLoading raw data from "{dataset_filename}"...')
     df = import_dataset(dataset_filename)

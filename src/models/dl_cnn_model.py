@@ -9,13 +9,13 @@ from torchinfo import summary
 
 from utils import evaluate_forecast, measure_time
 from models import saved_models_path
-from models.deep_learning_utils import create_dataloaders, train_model, test_model, set_seed
+from models.deep_learning_utils import create_dataloaders, train_model, test_model, set_seed, get_device
 
 from visualize import plot_real_vs_predicted
 
 # Define model parameters
 MODEL_FILENAME = 'dl_cnn_model.pth'
-NUM_EPOCHS = 2000
+NUM_EPOCHS = 400
 LEARNING_RATE = 1e-5
 BATCH_SIZE = 128
 
@@ -84,11 +84,15 @@ def train_and_test_cnn_model(X_train, y_train, X_test, y_test, minmax_scaler):
     # Set a seed for reproducibility
     set_seed(42)
 
+    # Get device
+    device = get_device()
+    print(f'Using device: {device}')
+
     # Create data loaders
-    train_loader, test_loader = create_dataloaders(X_train, y_train, X_test, y_test, BATCH_SIZE)
+    train_loader, test_loader = create_dataloaders(X_train, y_train, X_test, y_test, BATCH_SIZE, device)
 
     # Initialize the model, criterion, and optimizer
-    model = ConvolutionalNeuralNetwork()
+    model = ConvolutionalNeuralNetwork().to(device)
     criterion = nn.HuberLoss(delta=1.0)
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
@@ -101,14 +105,14 @@ def train_and_test_cnn_model(X_train, y_train, X_test, y_test, minmax_scaler):
     summary(model, input_size=(BATCH_SIZE, 1, 9))
 
     # Train the model
-    train_model(model, criterion, optimizer, train_loader, test_loader, NUM_EPOCHS)
+    train_model(model, criterion, optimizer, train_loader, test_loader, NUM_EPOCHS, device)
 
     # Save the trained model to disk
     torch.save(model.state_dict(), f'{saved_models_path}{MODEL_FILENAME}')
     print(f'\nModel saved to {saved_models_path}{MODEL_FILENAME}')
 
     # Test the model on the test set
-    y_test_pred = test_model(model, test_loader)
+    y_test_pred = test_model(model, test_loader, device)
 
     # Evaluate the predictions against the actual values
     test_evaluation = evaluate_forecast(y_test, y_test_pred.squeeze(), minmax_scaler)
